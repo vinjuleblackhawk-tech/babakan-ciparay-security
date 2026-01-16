@@ -3,32 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Babakan Ciparay Security System</title>
-<link rel="icon" href="favicon.ico">
-<!-- Chart.js CDN -->
+<title>Babakan Ciparay Security</title>
+<link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
-  body{background:#f4f6f8;color:#333;line-height:1.6;}
-  header{background:#004080;color:#fff;padding:1rem 2rem;text-align:center;}
-  header h1{font-size:2rem;margin-bottom:0.3rem;}
-  nav{display:flex;justify-content:center;gap:10px;margin:1rem 0;flex-wrap:wrap;}
-  nav button{padding:.6rem 1rem;border:1px solid #fff;background:rgba(255,255,255,.15);color:#fff;border-radius:5px;cursor:pointer;transition:.3s;}
-  nav button:hover{background:#fff;color:#004080;}
-  main{max-width:1200px;margin:0 auto;padding:2rem;background:#fff;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.05);}
-  section{margin-bottom:2rem;}
-  section h2{color:#004080;margin-bottom:1rem;border-bottom:2px solid #004080;display:inline-block;padding-bottom:.2rem;}
-  .report-form, .admin-form{display:flex;flex-direction:column;gap:1rem;}
-  .report-form input, .report-form textarea, .report-form select, .admin-form input, .admin-form select, .admin-form textarea{padding:.6rem;border-radius:5px;border:1px solid #ccc;font-size:1rem;width:100%;}
-  .report-form button, .admin-form button{padding:.8rem;background:#004080;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:1rem;transition:.3s;}
-  .report-form button:hover, .admin-form button:hover{background:#0066cc;}
-  table{width:100%;border-collapse:collapse;margin-top:1rem;}
-  table th, table td{border:1px solid #ccc;padding:.5rem;text-align:left;font-size:.9rem;}
-  table th{background:#f0f0f0;}
-  .chart-container{width:100%;max-width:1000px;margin-top:2rem;}
-  .opd-card{border:1px solid #ccc;border-radius:5px;padding:1rem;margin:1rem 0;background:#fafafa;}
-  footer{text-align:center;padding:1rem 2rem;margin-top:2rem;color:#555;font-size:.9rem;}
-</style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -37,229 +18,44 @@
 <p>Report, track, and analyze security incidents</p>
 </header>
 
-<nav>
-  <button onclick="scrollToSection('report')">Kirim Laporan</button>
-  <button onclick="scrollToSection('admin')">Admin Dashboard</button>
-  <button onclick="scrollToSection('analytics')">Analytics</button>
-  <button onclick="scrollToSection('opd')">OPD/SKPD Info</button>
-</nav>
-
 <main>
-
-<!-- REPORT FORM -->
-<section id="report">
-  <h2>Kirim Laporan</h2>
-  <form class="report-form" id="reportForm">
-    <label>Nama Pelapor</label>
-    <input type="text" id="name" required>
-    <label>Nomor WhatsApp</label>
-    <input type="tel" id="phone" required>
-    <label>RT</label>
-    <input type="text" id="rt" required>
-    <label>RW</label>
-    <input type="text" id="rw" required>
-    <label>Kelurahan</label>
-    <input type="text" id="kelurahan" required>
-    <label>Kategori Kejahatan</label>
-    <select id="crimeCategory" required>
-      <option value="">--Pilih Kategori--</option>
-      <option value="Theft">Pencurian</option>
-      <option value="Assault">Kekerasan</option>
-      <option value="Fraud">Penipuan</option>
-      <option value="Other">Lainnya</option>
-    </select>
-    <label>Deskripsi Kejadian</label>
-    <textarea id="description" rows="4" required></textarea>
-    <label>Bukti (Gambar/Video)</label>
-    <input type="file" id="evidence" multiple>
-    <button type="submit">Kirim Laporan</button>
-  </form>
+<!-- Login Section -->
+<section id="login">
+  <h2>Login / Register</h2>
+  <div class="form-group"><input type="email" id="email" placeholder="Email" required></div>
+  <div class="form-group"><input type="password" id="password" placeholder="Password" required></div>
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+  <button onclick="loginGoogle()">Login with Google</button>
+  <p id="loginMsg"></p>
 </section>
 
-<!-- ADMIN DASHBOARD -->
-<section id="admin">
-<h2>Admin Dashboard</h2>
-<div>
-  <label>Filter by RT:</label>
-  <input type="text" id="filterRt" placeholder="RT">
-  <label>Filter by RW:</label>
-  <input type="text" id="filterRw" placeholder="RW">
-  <label>Filter by Kelurahan:</label>
-  <input type="text" id="filterKel" placeholder="Kelurahan">
-  <label>Filter by Crime Category:</label>
-  <select id="filterCategory">
-    <option value="">All</option>
-    <option value="Theft">Pencurian</option>
-    <option value="Assault">Kekerasan</option>
-    <option value="Fraud">Penipuan</option>
-    <option value="Other">Lainnya</option>
-  </select>
-  <button onclick="loadReports()">Apply Filters</button>
+<!-- Tabs -->
+<div class="tabs" id="tabs" style="display:none;">
+  <div class="tab-btn active" data-tab="reportTab">Kirim Laporan</div>
+  <div class="tab-btn" data-tab="adminTab">Admin Dashboard</div>
+  <div class="tab-btn" data-tab="analyticsTab">Analytics</div>
+  <div class="tab-btn" data-tab="opdTab">OPD/SKPD Info</div>
 </div>
-<table id="reportTable">
-  <thead>
-    <tr>
-      <th>Nama</th><th>Phone</th><th>RT</th><th>RW</th><th>Kelurahan</th>
-      <th>Kategori</th><th>Deskripsi</th><th>Bukti</th><th>Status</th><th>Action</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-</section>
 
-<!-- ANALYTICS -->
-<section id="analytics">
-<h2>Analytics</h2>
-<div class="chart-container">
-  <canvas id="crimeChart"></canvas>
-</div>
-<div class="chart-container">
-  <canvas id="timeChart"></canvas>
-</div>
-</section>
+<!-- Tab Contents -->
+<section id="reportTab" class="tab-content active"></section>
+<section id="adminTab" class="tab-content"></section>
+<section id="analyticsTab" class="tab-content"></section>
+<section id="opdTab" class="tab-content"></section>
 
-<!-- OPD/SKPD -->
-<section id="opd">
-<h2>OPD / SKPD Info</h2>
-<div id="opdList"></div>
-</section>
+<footer>&copy; 2026 Babakan Ciparay Security. All rights reserved.</footer>
 
-</main>
-
-<footer>
-&copy; 2026 Babakan Ciparay Security. All rights reserved.
-</footer>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
-<script>
-/* ------------------ Firebase Init ------------------ */
-const firebaseConfig = {
-  apiKey: "AIzaSyA0GLK1S4t4bAj0z-v5ELFpG9mr0UCj4eU",
-  authDomain: "babakan-ciparay-security.firebaseapp.com",
-  projectId: "babakan-ciparay-security",
-  storageBucket: "babakan-ciparay-security.firebasestorage.app",
-  messagingSenderId: "1043234481620",
-  appId: "1:1043234481620:web:d618042580d9acde02e241",
-  measurementId: "G-C37FQXNTHZ"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-/* ------------------ Scroll Function ------------------ */
-function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
-
-/* ------------------ Report Form Submit ------------------ */
-document.getElementById('reportForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const name = document.getElementById('name').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const rt = document.getElementById('rt').value.trim();
-  const rw = document.getElementById('rw').value.trim();
-  const kel = document.getElementById('kelurahan').value.trim();
-  const crimeCategory = document.getElementById('crimeCategory').value;
-  const description = document.getElementById('description').value.trim();
-  const files = document.getElementById('evidence').files;
-  const evidenceURLs = [];
-
-  try {
-    // Upload files to Firebase Storage
-    for(let i=0;i<files.length;i++){
-      const file = files[i];
-      const ref = storage.ref().child(`evidence/${Date.now()}_${file.name}`);
-      await ref.put(file);
-      const url = await ref.getDownloadURL();
-      evidenceURLs.push(url);
-    }
-
-    // Save report
-    await db.collection('reports').add({
-      name, phone, rt, rw, kelurahan: kel,
-      crimeCategory, description, evidenceURL: evidenceURLs,
-      status:"pending",
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    alert('✅ Laporan berhasil dikirim!');
-    this.reset();
-
-    // WhatsApp notification
-    const adminPhone="62812xxxxxxx"; // replace with admin number
-    const msg=encodeURIComponent(`Laporan baru dari ${name} (${phone}):\nKategori: ${crimeCategory}\nDeskripsi: ${description}`);
-    window.open(`https://wa.me/${adminPhone}?text=${msg}`,'_blank');
-
-  } catch(err){console.error(err); alert('❌ Error mengirim laporan.');}
-});
-
-/* ------------------ Load Reports for Admin ------------------ */
-async function loadReports(){
-  const rtFilter=document.getElementById('filterRt').value.trim();
-  const rwFilter=document.getElementById('filterRw').value.trim();
-  const kelFilter=document.getElementById('filterKel').value.trim();
-  const catFilter=document.getElementById('filterCategory').value;
-  const tbody=document.querySelector('#reportTable tbody');
-  tbody.innerHTML="";
-
-  let query=db.collection('reports').orderBy('timestamp','desc');
-  const snapshot=await query.get();
-
-  snapshot.forEach(doc=>{
-    const r=doc.data();
-    if((!rtFilter||r.rt===rtFilter)&&
-       (!rwFilter||r.rw===rwFilter)&&
-       (!kelFilter||r.kelurahan===kelFilter)&&
-       (!catFilter||r.crimeCategory===catFilter)){
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${r.name}</td>
-        <td>${r.phone}</td>
-        <td>${r.rt}</td>
-        <td>${r.rw}</td>
-        <td>${r.kelurahan}</td>
-        <td>${r.crimeCategory}</td>
-        <td>${r.description}</td>
-        <td>${r.evidenceURL.map(u=>`<a href="${u}" target="_blank">View</a>`).join(', ')}</td>
-        <td>${r.status}</td>
-        <td>
-          <button onclick="respondReport('${doc.id}')">Respond</button>
-          <button onclick="deleteReport('${doc.id}')">Delete</button>
-        </td>`;
-      tbody.appendChild(tr);
-    }
-  });
-}
-
-/* ------------------ Admin Respond ------------------ */
-async function respondReport(id){
-  const response=prompt("Masukkan kategori hukum & hukuman:");
-  if(response){
-    await db.collection('reports').doc(id).update({
-      adminResponse:response,
-      status:"responded",
-      responseTimestamp:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    const doc=await db.collection('reports').doc(id).get();
-    const r=doc.data();
-    // WhatsApp notification to reporter
-    const msg=encodeURIComponent(`Laporan Anda telah ditanggapi:\nKategori Hukum & Hukuman: ${response}`);
-    window.open(`https://wa.me/${r.phone}?text=${msg}`,'_blank');
-    loadReports();
-  }
-}
-
-/* ------------------ Delete Report ------------------ */
-async function deleteReport(id){
-  if(confirm("Hapus laporan ini?")){
-    await db.collection('reports').doc(id).delete();
-    loadReports();
-  }
-}
-
-/* ------------------ Analytics ------------------ */
+<!-- JS -->
+<script src="js/firebase-init.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/report.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/opd.js"></script>
+</body>
+</html>
+------------------ */
 async function loadAnalytics(){
   const snapshot=await db.collection('reports').get();
   const categoryCount={}, dailyCount={};
@@ -306,4 +102,5 @@ loadOPD();
 </script>
 </body>
 </html>
+
 
